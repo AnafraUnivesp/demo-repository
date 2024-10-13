@@ -10,32 +10,26 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 import dj_database_url
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-#SECRET_KEY = "django-insecure-gs1!vmql@7$nc7u^b+&&g9#u2$iimni8(37@ssxx_0h#jbler$"
-
-#SECRET KEY NOVA GERADA PARA TESTE VIA GERADO DE SECRET KEY
-SECRET_KEY = "nqhhri54qquo8_!!yu9w+f#u=s#u=7hupsc395jj#v4y&lzt!h"
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-gs1!vmql@7$nc7u^b+&&g9#u2$iimni8(37@ssxx_0h#jbler')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'False'
 
-##TO-DO Add the ALLOWED HOST FROM THE APP NAME
-ALLOWED_HOSTS = ['*']
-
+# Allowed hosts
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost,equilibreapp.azurewebsites.net').split(',')
 
 # Application definition
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -48,6 +42,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # Enables whitenoise for serving static files
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -55,6 +50,14 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+# Static files configuration
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# CSRF trusted origins
+CSRF_TRUSTED_ORIGINS = ['https://equilibreapp.azurewebsites.net']
+
 
 ROOT_URLCONF = "projeto_cad.urls"
 
@@ -108,7 +111,7 @@ DATABASES = {
    }
 }
 
-
+#postgresql://postgres:gklzpXMtfutLkSoLfrvYYaNKTviSqGGY@autorack.proxy.rlwy.net:56090/railway
 # Correcção de erro (https://dev.to/dennisivy11/easiest-django-postgres-connection-ever-with-railway-11h6 & https://pypi.org/project/dj-database-url/)
 DATABASES['default'] = dj_database_url.config(
     default='postgresql://postgres:gklzpXMtfutLkSoLfrvYYaNKTviSqGGY@autorack.proxy.rlwy.net:56090/railway',
@@ -162,7 +165,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = "/static/"
+#STATIC_URL = "/static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -170,3 +173,22 @@ STATIC_URL = "/static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
+#configured to output logs from deploy
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+        },
+    },
+}
