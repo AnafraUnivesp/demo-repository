@@ -2,7 +2,9 @@ from django.contrib import admin
 from django.urls import path
 from app_cad_clientes import views
 
+
 urlpatterns = [
+    #path('admin/', admin.site.urls),    
     path('', views.index, name='index'),
     path('clientes/', views.clientes, name='listagem_clientes'),
     path('cadastro/', views.cadastro, name='cadastro'),
